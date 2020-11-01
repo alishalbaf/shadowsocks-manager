@@ -21,6 +21,7 @@
                 <div style="margin-top: 30px;" ng-if="publicInfo.config.paypal && publicInfo.myPayType === 'paypal'" layout="column" layout-align="center center">
                     <div translate>请点击下面按钮完成PayPal支付</div>
                     <div style="margin-top: 5px;" id="paypal-button-container"></div>
+		    <div style="margin-top: 5px;" id="payir-button-container"><button id="payirbtn">Pay.ir پرداخت</button></div>
                 </div> 
             </div>
             <div layout="column" layout-align="center center" ng-if="publicInfo.status === 'choose'">
@@ -30,7 +31,7 @@
                         <div layout="row" layout-align="space-between center" style="min-width: 210px; max-width: 390px;">
                             <span flex="65" translate>{{ order.name }}</span>
                             <span flex="35" style="text-align:right; color: #888">
-                                <span>{{ publicInfo.myPayType === 'alipay' ? '￥' : '$' }}</span><span>{{ order[publicInfo.myPayType] }}</span>
+                                <span>{{ publicInfo.myPayType === 'alipay' ? '￥' : '﷼' }}</span><span>{{ order[publicInfo.myPayType] }}</span>
                             </span>
                         </div>
                     </md-radio-button>
