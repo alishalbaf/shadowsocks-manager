@@ -2,7 +2,8 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('paypal');
 const knex = appRequire('init/knex').knex;
 const cron = appRequire('init/cron');
-const paypal = require('paypal-rest-sdk');
+//const paypal = require('paypal-rest-sdk');
+const Payir = require('payir');
 const account = appRequire('plugins/account/index');
 const moment = require('moment');
 const push = appRequire('plugins/webgui/server/push');
@@ -12,16 +13,22 @@ const orderPlugin = appRequire('plugins/webgui_order');
 const groupPlugin = appRequire('plugins/group');
 
 if(config.plugins.paypal && config.plugins.paypal.use) {
+     console.log('configure gateway');
+	gateway = new Payir(config.plugins.paypal.client_secret);
+	/*
   paypal.configure({
     mode: config.plugins.paypal.mode,
     client_id: config.plugins.paypal.client_id,
     client_secret: config.plugins.paypal.client_secret,
   });
+  */
 }
 
 const createOrder = async (user, account, orderId) => {
   try {
+    console.log('user : '+user+' account '+account+' order '+orderId);
     const orderInfo = await orderPlugin.getOneOrder(orderId);
+    //console.log('order could not be found  :'+ orderInfo);
     if(+orderInfo.paypal <= 0) { return Promise.reject('amount error'); }
     const userInfo = await knex('user').where({ id: user }).then(s => s[0]);
     const groupInfo = await groupPlugin.getOneGroup(userInfo.group);
@@ -30,6 +37,11 @@ const createOrder = async (user, account, orderId) => {
         return Promise.reject('invalid order');
       }
     }
+    let return_url = 'http://Myandroidplus.ir/callback'; //config.plugins.webgui.site + '/user/account';
+    let cancel_url = 'http://Myandroidplus.ir/callback'; //config.plugins.webgui.site + '/user/account';
+      let amount = parseInt( orderInfo.paypal);
+
+	/* create payment json 
     const create_payment_json = {
       intent: 'sale',
       payer: {
@@ -47,6 +59,8 @@ const createOrder = async (user, account, orderId) => {
         description: orderInfo.name || 'ss'
       }]
     };
+	*/
+/*	
     const payment = await new Promise((resolve, reject) => {
       paypal.payment.create(JSON.stringify(create_payment_json), function (error, payment) {
         if (error) {
@@ -57,19 +71,26 @@ const createOrder = async (user, account, orderId) => {
         }
       });
     });
-    const myOrderId = moment().format('YYYYMMDDHHmmss') + Math.random().toString().substr(2, 6);
+*/
+      const myOrderId = moment().format('YYYYMMDDHHmmss') + Math.random().toString().substr(2, 6);
+      baselink = gateway.gateway;
+      let tlink=''
+      let link = await gateway.send(amount, return_url, myOrderId);
+      token = link.replace(baselink, '');
     await knex('paypal').insert({
       orderId: myOrderId,
-      paypalId: payment.id,
+      paypalId: token,
       orderType: orderId,
       amount: orderInfo.paypal + '',
       user,
       account: (account !== 'undefined' && account !== 'null' && account) ? account : null,
-      status: 'created',
+        status: 'created',
+        link:link,
       createTime: Date.now(),
-      expireTime: Date.now() + 2 * 60 * 60 * 1000,
+      expireTime: Date.now() + 30 * 60 * 1000,
     });
-    return { paymentID: payment.id };
+	console.log('token:'+token+' link:'+link);
+    return { paymentID: token, link:link };
   } catch (err) {
     console.log(err);
     return Promise.reject(err);
@@ -77,6 +98,13 @@ const createOrder = async (user, account, orderId) => {
 };
 
 const executeOrder = async (order) => {
+
+    link = order.paymentID;
+    app.get('/', function (req, res) {
+        res.redirect(link);
+    }
+    );
+    /*
   const orderInfo = await new Promise((resolve, reject) => {
     paypal.payment.get(order.paymentID, function (error, payment) {
       if (error) {
@@ -103,12 +131,41 @@ const executeOrder = async (order) => {
       }
     });
   });
+
+    */
 };
 
 exports.createOrder = createOrder;
 exports.executeOrder = executeOrder;
-
+//verify
 const checkOrder = async paypalId => {
+	paypalId=parseInt(paypalId);
+	if (isNaN(paypalId)) return;
+    var bdy = {
+        transId: paypalId,
+        cardNumber: '',
+        factorNumber: ''
+    }
+console.log('start checking ...'+ paypalId);
+    var status='approved';
+	try{
+	var orderInfo=await gateway.verify(bdy);
+	}
+	catch(err)
+{
+	console.log(err);
+	return;
+}
+        /*
+        .then((data) => {
+            console.log('Invoice (Factor) Number: ' + data.factorNumber);
+            console.log('Transaction ID: ' + data.transactionId);
+            console.log('Transaction Amount: ' + data.amount);
+            console.log('Card Number: ' + data.cardNumber);
+            res.end('Payment was successful.\nCheck the console for more details.');
+        })
+        .catch(error => res.end("<head><meta charset='utf8'></head>" + error));
+        
   const orderInfo = await new Promise((resolve, reject) => {
     paypal.payment.get(paypalId, function (error, payment) {
       if (error) {
@@ -119,7 +176,8 @@ const checkOrder = async paypalId => {
       }
     });
   });
-  await knex('paypal').update({ status: orderInfo.state, paypalData: JSON.stringify(orderInfo) }).where({ paypalId });
+  */
+  await knex('paypal').update({ status: status, paypalData: JSON.stringify(orderInfo) }).where({ paypalId });
   return;
 };
 
@@ -148,6 +206,7 @@ const sendSuccessMail = async userId => {
 
 cron.minute(async () => {
   if(!config.plugins.paypal || !config.plugins.paypal.use) { return; }
+	console.log('cron checker started!');
   const orders = await knex('paypal').select().whereNotBetween('expireTime', [0, Date.now()]);
   const scanOrder = order => {
     if(order.status !== 'approved' && order.status !== 'finish') {
