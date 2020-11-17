@@ -1,42 +1,39 @@
 {
-  "name": "shadowsocks-manager",
-  "version": "0.36.45",
-  "description": "A shadowsocks manager tool for multi user and traffic control.",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "build": "gulp",
-    "prepare": "gulp",
-    "prepublishOnly": "gulp",
-    "check": "eslint .",
-    "fix": "eslint . --fix"
+  "_from": "shadowsocks-manager@0.36.45",
+  "_id": "shadowsocks-manager@0.36.45",
+  "_inBundle": false,
+  "_integrity": "sha512-O/9v7MG24Yf6j25bnoBddpbDOwm//O1PE0pbqJ2FgzrsX1QSzelfTRJK8LFFIwvBp6zBw0N1v3kmVi3flfmMGw==",
+  "_location": "/shadowsocks-manager",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "shadowsocks-manager@0.36.45",
+    "name": "shadowsocks-manager",
+    "escapedName": "shadowsocks-manager",
+    "rawSpec": "0.36.45",
+    "saveSpec": null,
+    "fetchSpec": "0.36.45"
   },
-  "author": "Gu Yuteng <igyteng@gmail.com>",
-  "license": "GPL-3.0",
-  "keywords": [
-    "ssmgr",
-    "shadowsocks",
-    "manager",
-    "gfw"
+  "_requiredBy": [
+    "#USER",
+    "/"
   ],
-  "devDependencies": {
-    "@babel/cli": "^7.11.6",
-    "@babel/core": "^7.11.6",
-    "@babel/polyfill": "^7.11.5",
-    "@babel/preset-env": "^7.11.5",
-    "ajv": "^6.12.5",
-    "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.1.0",
-    "del": "^3.0.0",
-    "eslint": "^5.16.0",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-clean-css": "^3.10.0",
-    "gulp-concat": "^2.6.1",
-    "terser-webpack-plugin": "^2.3.8",
-    "webpack": "^4.44.2",
-    "webpack-stream": "^5.2.1"
+  "_resolved": "https://registry.npmjs.org/shadowsocks-manager/-/shadowsocks-manager-0.36.45.tgz",
+  "_shasum": "05654d2643e646e19c6a8c5a774063c648e3b286",
+  "_spec": "shadowsocks-manager@0.36.45",
+  "_where": "/root",
+  "author": {
+    "name": "Gu Yuteng",
+    "email": "igyteng@gmail.com"
   },
+  "bin": {
+    "ssmgr": "bin/ssmgr"
+  },
+  "bugs": {
+    "url": "https://github.com/shadowsocks/shadowsocks-manager/issues"
+  },
+  "bundleDependencies": false,
   "dependencies": {
     "alipay-ftof": "0.1.5",
     "body-parser": "^1.19.0",
@@ -60,6 +57,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.4.11",
     "oauth-1.0a": "^2.2.6",
+    "payir": "^1.0.0",
     "paypal-rest-sdk": "^1.8.1",
     "qr-image": "^3.2.0",
     "request": "^2.88.2",
@@ -71,15 +69,47 @@
     "web-push": "^3.4.4",
     "ws": "^6.2.1"
   },
+  "deprecated": false,
+  "description": "A shadowsocks manager tool for multi user and traffic control.",
+  "devDependencies": {
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
+    "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "ajv": "^6.12.5",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "del": "^3.0.0",
+    "eslint": "^5.16.0",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^3.10.0",
+    "gulp-concat": "^2.6.1",
+    "terser-webpack-plugin": "^2.3.8",
+    "webpack": "^4.44.2",
+    "webpack-stream": "^5.2.1"
+  },
+  "homepage": "https://github.com/shadowsocks/shadowsocks-manager#readme",
+  "keywords": [
+    "ssmgr",
+    "shadowsocks",
+    "manager",
+    "gfw"
+  ],
+  "license": "GPL-3.0",
+  "main": "server.js",
+  "name": "shadowsocks-manager",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shadowsocks/shadowsocks-manager.git"
   },
-  "bugs": {
-    "url": "https://github.com/shadowsocks/shadowsocks-manager/issues"
+  "scripts": {
+    "build": "gulp",
+    "check": "eslint .",
+    "fix": "eslint . --fix",
+    "prepare": "gulp",
+    "prepublishOnly": "gulp",
+    "start": "node server.js"
   },
-  "homepage": "https://github.com/shadowsocks/shadowsocks-manager#readme",
-  "bin": {
-    "ssmgr": "./bin/ssmgr"
-  }
+  "version": "0.36.45"
 }

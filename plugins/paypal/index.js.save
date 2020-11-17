@@ -13,8 +13,9 @@ const orderPlugin = appRequire('plugins/webgui_order');
 const groupPlugin = appRequire('plugins/group');
 
 if(config.plugins.paypal && config.plugins.paypal.use) {
-     console.log('configure gateway');
+//     console.log('configure gateway');
 	gateway = new Payir(config.plugins.paypal.client_secret);
+
 	/*
   paypal.configure({
     mode: config.plugins.paypal.mode,
@@ -37,8 +38,8 @@ const createOrder = async (user, account, orderId) => {
         return Promise.reject('invalid order');
       }
     }
-    let return_url = 'http://Myandroidplus.ir/callback'; //config.plugins.webgui.site + '/user/account';
-    let cancel_url = 'http://Myandroidplus.ir/callback'; //config.plugins.webgui.site + '/user/account';
+    let return_url = config.plugins.webgui.site + '/user/account';
+    let cancel_url = config.plugins.webgui.site + '/user/account';
       let amount = parseInt( orderInfo.paypal);
 
 	/* create payment json 
@@ -73,10 +74,14 @@ const createOrder = async (user, account, orderId) => {
     });
 */
       const myOrderId = moment().format('YYYYMMDDHHmmss') + Math.random().toString().substr(2, 6);
-      baselink = gateway.gateway;
+      baselink = Payir.gateway;
       let tlink=''
+    console.log('call gateway');
+console.log(gateway);
       let link = await gateway.send(amount, return_url, myOrderId);
       token = link.replace(baselink, '');
+      //res.redirect(link) 
+  
     await knex('paypal').insert({
       orderId: myOrderId,
       paypalId: token,
@@ -89,8 +94,7 @@ const createOrder = async (user, account, orderId) => {
       createTime: Date.now(),
       expireTime: Date.now() + 30 * 60 * 1000,
     });
-	console.log('token:'+token+' link:'+link);
-    return { paymentID: token, link:link };
+    return { paymentID: token };
   } catch (err) {
     console.log(err);
     return Promise.reject(err);
@@ -139,23 +143,12 @@ exports.createOrder = createOrder;
 exports.executeOrder = executeOrder;
 //verify
 const checkOrder = async paypalId => {
-	paypalId=parseInt(paypalId);
-	if (isNaN(paypalId)) return;
     var bdy = {
         transId: paypalId,
         cardNumber: '',
         factorNumber: ''
     }
-console.log('start checking ...'+ paypalId);
-    var status='approved';
-	try{
-	var orderInfo=await gateway.verify(bdy);
-	}
-	catch(err)
-{
-	console.log(err);
-	return;
-}
+    var r=await gateway.verify(bdy);
         /*
         .then((data) => {
             console.log('Invoice (Factor) Number: ' + data.factorNumber);
@@ -177,7 +170,7 @@ console.log('start checking ...'+ paypalId);
     });
   });
   */
-  await knex('paypal').update({ status: status, paypalData: JSON.stringify(orderInfo) }).where({ paypalId });
+  await knex('paypal').update({ status: orderInfo.state, paypalData: JSON.stringify(r) }).where({ paypalId });
   return;
 };
 
@@ -206,7 +199,6 @@ const sendSuccessMail = async userId => {
 
 cron.minute(async () => {
   if(!config.plugins.paypal || !config.plugins.paypal.use) { return; }
-	console.log('cron checker started!');
   const orders = await knex('paypal').select().whereNotBetween('expireTime', [0, Date.now()]);
   const scanOrder = order => {
     if(order.status !== 'approved' && order.status !== 'finish') {
@@ -321,59 +313,11 @@ const orderListAndPaging = async (options = {}) => {
   };
 };
 
-
-const getCsvOrder = async (options = {}) => {
-  const search = options.search || '';
-  const group = options.group;
-  const filter = options.filter || [];
-  const sort = options.sort || 'paypal.createTime_desc';
-  const start = options.start ? moment(options.start).hour(0).minute(0).second(0).millisecond(0).toDate().getTime() : moment(0).toDate().getTime();
-  const end = options.end ? moment(options.end).hour(23).minute(59).second(59).millisecond(999).toDate().getTime() : moment().toDate().getTime();
-
-  let orders = knex('paypal').select([
-    'paypal.orderId',
-    'paypal.orderType',
-    'user.id as userId',
-    'user.group as group',
-    'user.username',
-    'account_plugin.port',
-    'paypal.amount',
-    'paypal.status as pstatus',
-    'paypal.paypalData',
-    'paypal.createTime',
-    'paypal.expireTime',
-
-  ])
-  .leftJoin('user', 'user.id', 'paypal.user')
-  .leftJoin('account_plugin', 'account_plugin.id', 'paypal.account')
-  .whereBetween('paypal.createTime', [start, end]);
-
-  if(filter.length) {
-    fll=filter.map(v => v.toLowerCase());
-    orders = orders.whereIn('pstatus', fll);
-  }
-  if(group >= 0) {
-    orders = orders.where({ 'user.group': group });
-  }
-  if(search) {
-    orders = orders.where('paypal.orderId', 'like', `%${ search }%`);
-  }
-
-  orders = await orders.orderBy(sort.split('_')[0], sort.split('_')[1]);
-  orders.forEach(f => {
-    f.paypalData = JSON.parse(f.paypalData);
-  });
-  return orders;
-};
-
-exports.getCsvOrder=getCsvOrder;
-
 const getUserFinishOrder = async userId => {
   let orders = await knex('paypal').select([
     'orderId',
     'amount',
     'createTime',
-    'status',
   ]).where({
     user: userId,
   }).orderBy('createTime', 'DESC');
@@ -383,7 +327,6 @@ const getUserFinishOrder = async userId => {
       type: 'Paypal',
       amount: order.amount,
       createTime: order.createTime,
-      status: order.status,
     };
   });
   return orders;

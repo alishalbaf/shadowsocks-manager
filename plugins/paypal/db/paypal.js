@@ -13,6 +13,7 @@ const createTable = async () => {
     table.integer('account');
     table.string('paypalId').unique();
     table.string('status');
+	table.string('link');
     table.string('paypalData', 4096);
     table.bigInteger('createTime');
     table.bigInteger('expireTime');
