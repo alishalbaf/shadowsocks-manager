@@ -41,6 +41,7 @@ app.factory('languageDialog' , [ '$mdDialog', $mdDialog => {
         { id: 'ja-JP', name: '日本語' },
         { id: 'ko-KR', name: '한국' },
         { id: 'ru-RU', name: 'Русский' },
+	{ id: 'fa-IR', name: 'فارسی' },
       ];
       $scope.languages.forEach(language => {
         if(language.id === window.ssmgrConfig.language) {

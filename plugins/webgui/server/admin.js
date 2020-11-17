@@ -487,7 +487,31 @@ exports.getPaypalOrders = (req, res) => {
 };
 
 exports.getPaypalCsvOrders = async (req, res) => {
-  res.send('PP');
+  //res.send('currently Not available . shayan must program this. but he is too lazy to do this :)');
+
+  const options = {};
+  if(req.adminInfo.id === 1) {
+    options.group = +req.query.group;
+  } else {
+    options.group = req.adminInfo.group;
+  }
+  options.search = req.query.search || '';
+  options.sort = req.query.sort || 'paypal.createTime_desc';
+  options.start = req.query.start;
+  options.end = req.query.end;
+
+  options.filter = ( Array.isArray(req.query.filter) ? req.query.filter : [req.query.filter] ) || [];
+  paypal.getCsvOrder(options)
+  .then(success => {
+    res.setHeader('Content-disposition', 'attachment; filename=download.csv');
+    res.setHeader('Content-type', 'text/csv');
+    res.send(success.map(m => {
+      return `${ m.orderId }, ${ m.amount }, ${ m.username }, ${ m.pstatus }`;
+    }).join('\r\n'));
+  }).catch(err => {
+    console.log(err);
+    res.status(403).end();
+  });
 };
 
 exports.getUserPortLastConnect = (req, res) => {

@@ -5,7 +5,8 @@ app.config(['$translateProvider', $translateProvider => {
   $translateProvider.translations('ja-JP', require('./ja-JP.js'));
   $translateProvider.translations('ru-RU', require('./ru-RU.js'));
   $translateProvider.translations('ko-KR', require('./ko-KR.js'));
-  $translateProvider.preferredLanguage(window.ssmgrConfig.language || navigator.language || 'zh-CN');
+  $translateProvider.translations('fa-IR', require('./fa-IR.js'));
+  $translateProvider.preferredLanguage(window.ssmgrConfig.language || navigator.language || 'fa-IR');
   $translateProvider.useSanitizeValueStrategy('escape');
 }]);
 

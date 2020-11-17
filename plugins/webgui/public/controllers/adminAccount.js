@@ -165,6 +165,7 @@ app.controller('AdminAccountController', ['$scope', '$state', '$mdMedia', '$http
       $scope.serverPortFlow = 0;
       $scope.lastConnect = 0;
       adminApi.getServerPortData(serverId, accountId).then(success => {
+	console.log(success);
         $scope.serverPortFlow = success.serverPortFlow;
         $scope.lastConnect = success.lastConnect;
         // let maxFlow = 0;

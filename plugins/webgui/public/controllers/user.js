@@ -271,6 +271,7 @@ app
             $scope.account[index].port = a.port;
             $scope.account[index].type = a.type;
             $scope.account[index].active = a.active;
+	    $scope.account[index].comment = a.comment;
           });
         } else {
           $scope.account = success.account;
@@ -322,7 +323,7 @@ app
           `AllowedIPs = 0.0.0.0/0`,
         ].join('\n');
       } else if(server.type === 'Shadowsocks') {
-        return 'ss://' + base64Encode(server.method + ':' + account.password + '@' + server.host + ':' + (account.port + server.shift));
+        return 'ss://' + base64Encode(server.method + ':' + account.password + '@' + server.host + ':' + (account.port + server.shift)+server.comment);
       } else if(server.type === 'Trojan') {
         return 'trojan://' + encodeURIComponent(account.port + ':' + account.password) + '@' + server.host + ':' + server.tjPort + '#' + encodeURIComponent(server.name);
       }
