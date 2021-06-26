@@ -164,11 +164,11 @@ telegram.on('message', async message => {
     tg.sendKeyboard('لطفا سرور را انتخاب کنید', telegramId, {
       inline_keyboard: serverArray,
     });
-    if(myAccount.type >= 2 && myAccount.type <= 5 && config.plugins.alipay && config.plugins.alipay.use) {
+    if(myAccount.type >= 2 && myAccount.type <= 5 && config.plugins.paypal && config.plugins.paypal.use) {
       tg.sendKeyboard('تجدید', telegramId, {
         inline_keyboard: [[{
           text: 'برای تمدید اینجا کلیک کنید ' + myAccount.port,
-          callback_data: `alipay:accountId[${ myAccount.id }]`,
+          callback_data: `paypal:accountId[${ myAccount.id }]`,
         }]],
       });
     }
@@ -284,7 +284,7 @@ telegram.on('message', async message => {
     for(const order of orders) {
       if(order.paypal > 0) {
         paymentArray.push([{
-          text: `${ order.name } ${ order.alipay }`,
+          text: `${ order.name } ${ order.paypal }`,
           callback_data: `paypal:qrcode:accountId[${ accountId }]type[${ order.id }]`,
         }]);
       }
@@ -293,7 +293,7 @@ telegram.on('message', async message => {
       inline_keyboard: paymentArray,
     });
   } else if(isCallbackPayQrcode(message)) {
-    const alipay = appRequire('plugins/paypal/index');
+    const paypal = appRequire('plugins/paypal/index');
     const telegramId = message.callback_query.from.id.toString();
     const accountId = +message.callback_query.data.match(/^paypal:qrcode:accountId\[(\d{1,})\]type\[[0-9]{1,}\]$/)[1];
     const orderId = message.callback_query.data.match(/^paypal:qrcode:accountId\[\d{1,}\]type\[([0-9]{1,})\]$/)[1];
@@ -302,7 +302,7 @@ telegram.on('message', async message => {
     const payInfo = await paypal.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: payInfo.link, time: Date.now() };
-    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از Alipay استفاده کنید\n\nیا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت Alipay بروید`, telegramId);
+    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از pay.ir استفاده کنید\n\nیا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت pay.ir بروید`, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
 });
