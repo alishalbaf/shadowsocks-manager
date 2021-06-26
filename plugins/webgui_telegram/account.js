@@ -302,7 +302,7 @@ telegram.on('message', async message => {
     const payInfo = await paypal.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: payInfo.link, time: Date.now() };
-    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از pay.ir استفاده کنید\n\nیا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت pay.ir بروید`, telegramId);
+    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از pay.ir استفاده کنید\n\n(${ payInfo.link }) یا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت pay.ir بروید`, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
 });
