@@ -25,13 +25,13 @@ telegram.on('message', async message => {
   })).title;
   const site = config.plugins.webgui.site;
   if(userStatus.status === 'empty') {
-    tg.sendKeyboard(`欢迎使用 ${ title }，\n\n请在这里输入您的邮箱以接收验证码来注册账号\n\n或者点击以下按钮访问网页版`, telegramId, {
+    tg.sendKeyboard(`خوش آمدی ${ title }，\n\nلطفا ایمیل خود را اینجا وارد کنید تا کد تأیید برای ثبت نام یک حساب را دریافت کنید\n\nیا برای بازدید از نسخه وب روی دکمه زیر کلیک کنید`, telegramId, {
       inline_keyboard: [[{
-        text: '登录网页版',
+        text: 'وارد نسخه وب شوید',
         url: site,
       }]],
     });
   } else if (userStatus.status === 'normal') {
-    tg.sendMessage('指令列表：\n\naccount: 显示ss账号信息\nlogin: 快捷登录网页版', telegramId);
+    tg.sendMessage('لیست دستورالعمل ها：\n\naccount: نمایش دادنssاطلاعات حساب\nlogin: ورود به سیستم سریع نسخه وب', telegramId);
   }
 });

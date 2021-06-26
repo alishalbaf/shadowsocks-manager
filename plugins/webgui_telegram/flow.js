@@ -37,7 +37,7 @@ const getUsers = async () => {
     const end = moment().hour(0).minute(0).second(0).millisecond(0).toDate().getTime();
     accounts.forEach(async account => {
       const myFlow = await flow.getFlowFromSplitTime(null, account.id, start, end);
-      const message = `昨日流量统计：[${ account.port }] ${ prettyFlow(myFlow) }`;
+      const message = `آمار ترافیک دیروز：[${ account.port }] ${ prettyFlow(myFlow) }`;
       logger.info(message);
       // telegram.emit('send', +user.telegram, message);
       tg.sendMessage(message, +user.telegram);
