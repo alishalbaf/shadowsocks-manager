@@ -84,11 +84,11 @@ telegram.on('message', async message => {
     const userId = await isUser(telegramId);
     const myAccount = await account.getAccount({ userId });
     if(!myAccount.length) {
-      tg.sendMessage('کاربر فعلی هیچ حسابی اختصاص داده نشده است', telegramId);
+      tg.sendMessage('The current user has no account assigned', telegramId);
       if(config.plugins.alipay && config.plugins.alipay.use) {
-        tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
+        tg.sendKeyboard('Buy a new account', telegramId, {
           inline_keyboard: [[{
-            text: '点击这里购买',
+            text: 'Click here to buy',
             callback_data: `alipay:accountId[0]`,
           }]],
         });
@@ -101,7 +101,7 @@ telegram.on('message', async message => {
         callback_data: `accountId[${ m.id }]`,
       };
     });
-    tg.sendKeyboard('لطفاً یک حساب کاربری انتخاب کنید', telegramId, {
+    tg.sendKeyboard('Please select an account', telegramId, {
       inline_keyboard: [
         keyboard
       ],
@@ -114,9 +114,9 @@ telegram.on('message', async message => {
     .where({ 'user.id': userId }).then(s => s[0]);
     if(groupInfo && groupInfo.multiAccount) {
       if(config.plugins.alipay && config.plugins.alipay.use) {
-        tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
+        tg.sendKeyboard('Buy a new account', telegramId, {
           inline_keyboard: [[{
-            text: 'برای خرید اینجا را کلیک کنید',
+            text: 'Click here to buy',
             callback_data: `alipay:accountId[0]`,
           }]],
         });
@@ -161,13 +161,13 @@ telegram.on('message', async message => {
         });
       });
     }
-    tg.sendKeyboard('لطفا سرور را انتخاب کنید', telegramId, {
+    tg.sendKeyboard('please choose the server', telegramId, {
       inline_keyboard: serverArray,
     });
     if(myAccount.type >= 2 && myAccount.type <= 5 && config.plugins.alipay && config.plugins.alipay.use) {
-      tg.sendKeyboard('تجدید', telegramId, {
+      tg.sendKeyboard('Renew', telegramId, {
         inline_keyboard: [[{
-          text: 'برای تمدید اینجا کلیک کنید ' + myAccount.port,
+          text: 'Click here to renew ' + myAccount.port,
           callback_data: `alipay:accountId[${ myAccount.id }]`,
         }]],
       });
@@ -189,9 +189,9 @@ telegram.on('message', async message => {
       return server;
     })[0];
     if(!myAccount || !myServer) { return; }
-    let returnMessage = 'اطلاعات حساب\n\n';
+    let returnMessage = 'account information\n\n';
     const ssurl = 'ss://' + Buffer.from(`${ myServer.method }:${ myAccount.password }@${ myServer.host }:${ myAccount.port }`).toString('base64');
-    returnMessage += `نشانی：${ myServer.host }\nپورت：${ myAccount.port }\nکلمه عبور：${ myAccount.password }\nرمزگذاری：${ myServer.method }\n\n`;
+    returnMessage += `address：${ myServer.host }\nport：${ myAccount.port }\npassword：${ myAccount.password }\nencryption method：${ myServer.method }\n\n`;
     tg.sendMessage(returnMessage, telegramId);
     if(myAccount.type >= 2 && myAccount.type <= 5) {
       
@@ -203,7 +203,7 @@ telegram.on('message', async message => {
       const data = JSON.parse(myAccount.data);
       const expireTime = data.create + data.limit * timePeriod;
       await sleep(250);
-      const isExpired = Date.now() >= expireTime ? ' [منقضی شده]' : '';
+      const isExpired = Date.now() >= expireTime ? ' [expired]' : '';
 
       const time = {
         '2': 7 * 24 * 3600000,
@@ -222,8 +222,8 @@ telegram.on('message', async message => {
       }
       const flowLimit = data.flow * (myAccount.isMultiServerFlow ? 1 : myServer.scale);
       const currentFlow = (await flow.getServerPortFlowWithScale(myServer.id, myAccount.id, timeArray, myAccount.multiServerFlow))[0];
-      tg.sendMessage(`جریان：${ prettyFlow(currentFlow) } / ${ prettyFlow(flowLimit) }`, telegramId);
-      tg.sendMessage(`تاریخ انقضا：${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
+      tg.sendMessage(`flow：${ prettyFlow(currentFlow) } / ${ prettyFlow(flowLimit) }`, telegramId);
+      tg.sendMessage(`expire date：${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
     }
     await sleep(250);
     tg.sendMarkdown(`[${ ssurl }](${ ssurl })`, telegramId);
@@ -238,9 +238,9 @@ telegram.on('message', async message => {
       userId: +userId,
       time: Date.now(),
     };
-    tg.sendKeyboard('وارد شدن', telegramId, {
+    tg.sendKeyboard('log in', telegramId, {
       inline_keyboard: [[{
-        text: 'برای ورود به نسخه وب اینجا را کلیک کنید',
+        text: 'Click here to log in to the web version',
         url: `${ config.plugins.webgui.site }/home/login/telegram/${ token }`
       }]],
     });
@@ -289,7 +289,7 @@ telegram.on('message', async message => {
         }]);
       }
     }
-    tg.sendKeyboard('نوع تمدید را انتخاب کنید：', telegramId, {
+    tg.sendKeyboard('Select renewal type：', telegramId, {
       inline_keyboard: paymentArray,
     });
   } else if(isCallbackPayQrcode(message)) {
@@ -301,7 +301,7 @@ telegram.on('message', async message => {
     const payInfo = await alipay.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: payInfo.qrCode, time: Date.now() };
-    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از Alipay استفاده کنید\n\nیا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت Alipay بروید`, telegramId);
+    tg.sendMarkdown(`Please use Alipay to scan the QR code below to complete the payment\n\nor [Click this link](${ payInfo.qrCode }) Jump to Alipay payment`, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
 });
