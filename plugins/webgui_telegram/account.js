@@ -65,14 +65,14 @@ const isCallbackServer = message => {
 
 const isCallbackPay = message => {
   if(!message.callback_query || !message.callback_query.data) { return false; }
-  if(!message.callback_query.data.match(/^alipay:accountId\[\d{1,}\]$/)) {
+  if(!message.callback_query.data.match(/^paypal:accountId\[\d{1,}\]$/)) {
     return false;
   }
   return true;
 };
 const isCallbackPayQrcode = message => {
   if(!message.callback_query || !message.callback_query.data) { return false; }
-  if(!message.callback_query.data.match(/^alipay:qrcode:accountId\[\d{1,}\]type\[[0-9]{1,}\]$/)) {
+  if(!message.callback_query.data.match(/^paypal:qrcode:accountId\[\d{1,}\]type\[[0-9]{1,}\]$/)) {
     return false;
   }
   return true;
@@ -85,11 +85,11 @@ telegram.on('message', async message => {
     const myAccount = await account.getAccount({ userId });
     if(!myAccount.length) {
       tg.sendMessage('کاربر فعلی هیچ حسابی اختصاص داده نشده است', telegramId);
-      if(config.plugins.alipay && config.plugins.alipay.use) {
+      if(config.plugins.paypal && config.plugins.paypal.use) {
         tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
           inline_keyboard: [[{
-            text: '点击这里购买',
-            callback_data: `alipay:accountId[0]`,
+            text: 'برای خرید اینجا را کلیک کنید',
+            callback_data: `paypal:accountId[0]`,
           }]],
         });
       }
@@ -113,11 +113,11 @@ telegram.on('message', async message => {
     .leftJoin('account_plugin', 'account_plugin.userId', 'user.id')
     .where({ 'user.id': userId }).then(s => s[0]);
     if(groupInfo && groupInfo.multiAccount) {
-      if(config.plugins.alipay && config.plugins.alipay.use) {
+      if(config.plugins.paypal && config.plugins.paypal.use) {
         tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
           inline_keyboard: [[{
             text: 'برای خرید اینجا را کلیک کنید',
-            callback_data: `alipay:accountId[0]`,
+            callback_data: `paypal:accountId[0]`,
           }]],
         });
       }
@@ -246,7 +246,7 @@ telegram.on('message', async message => {
     });
   } else if(isCallbackPay(message)) {
     const telegramId = message.callback_query.from.id.toString();
-    const accountId = +message.callback_query.data.match(/^alipay:accountId\[(\d{1,})\]$/)[1];
+    const accountId = +message.callback_query.data.match(/^paypal:accountId\[(\d{1,})\]$/)[1];
     const userId = await isUser(telegramId);
     const groupInfo = await knex('group').select([
       'group.order as order'
@@ -282,10 +282,10 @@ telegram.on('message', async message => {
     
     const paymentArray = [];
     for(const order of orders) {
-      if(order.alipay > 0) {
+      if(order.paypal > 0) {
         paymentArray.push([{
           text: `${ order.name } ${ order.alipay }`,
-          callback_data: `alipay:qrcode:accountId[${ accountId }]type[${ order.id }]`,
+          callback_data: `paypal:qrcode:accountId[${ accountId }]type[${ order.id }]`,
         }]);
       }
     }
@@ -293,14 +293,15 @@ telegram.on('message', async message => {
       inline_keyboard: paymentArray,
     });
   } else if(isCallbackPayQrcode(message)) {
-    const alipay = appRequire('plugins/alipay/index');
+    const alipay = appRequire('plugins/paypal/index');
     const telegramId = message.callback_query.from.id.toString();
-    const accountId = +message.callback_query.data.match(/^alipay:qrcode:accountId\[(\d{1,})\]type\[[0-9]{1,}\]$/)[1];
-    const orderId = message.callback_query.data.match(/^alipay:qrcode:accountId\[\d{1,}\]type\[([0-9]{1,})\]$/)[1];
+    const accountId = +message.callback_query.data.match(/^paypal:qrcode:accountId\[(\d{1,})\]type\[[0-9]{1,}\]$/)[1];
+    const orderId = message.callback_query.data.match(/^paypal:qrcode:accountId\[\d{1,}\]type\[([0-9]{1,})\]$/)[1];
     const userId = (await tg.getUserStatus(telegramId)).id;
-    const payInfo = await alipay.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
+    
+    const payInfo = await paypal.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
-    qrcodeObj[qrcodeId] = { url: payInfo.qrCode, time: Date.now() };
+    qrcodeObj[qrcodeId] = { url: payInfo.link, time: Date.now() };
     tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از Alipay استفاده کنید\n\nیا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت Alipay بروید`, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
