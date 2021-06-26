@@ -84,11 +84,11 @@ telegram.on('message', async message => {
     const userId = await isUser(telegramId);
     const myAccount = await account.getAccount({ userId });
     if(!myAccount.length) {
-      tg.sendMessage('The current user has no account assigned', telegramId);
+      tg.sendMessage('当前用户没有分配账号', telegramId);
       if(config.plugins.alipay && config.plugins.alipay.use) {
-        tg.sendKeyboard('Buy a new account', telegramId, {
+        tg.sendKeyboard('购买新账号', telegramId, {
           inline_keyboard: [[{
-            text: 'Click here to buy',
+            text: '点击这里购买',
             callback_data: `alipay:accountId[0]`,
           }]],
         });
@@ -101,7 +101,7 @@ telegram.on('message', async message => {
         callback_data: `accountId[${ m.id }]`,
       };
     });
-    tg.sendKeyboard('Please select an account', telegramId, {
+    tg.sendKeyboard('请选择账号', telegramId, {
       inline_keyboard: [
         keyboard
       ],
@@ -114,9 +114,9 @@ telegram.on('message', async message => {
     .where({ 'user.id': userId }).then(s => s[0]);
     if(groupInfo && groupInfo.multiAccount) {
       if(config.plugins.alipay && config.plugins.alipay.use) {
-        tg.sendKeyboard('Buy a new account', telegramId, {
+        tg.sendKeyboard('购买新账号', telegramId, {
           inline_keyboard: [[{
-            text: 'Click here to buy',
+            text: '点击这里购买',
             callback_data: `alipay:accountId[0]`,
           }]],
         });
@@ -161,13 +161,13 @@ telegram.on('message', async message => {
         });
       });
     }
-    tg.sendKeyboard('please choose the server', telegramId, {
+    tg.sendKeyboard('请选择服务器', telegramId, {
       inline_keyboard: serverArray,
     });
     if(myAccount.type >= 2 && myAccount.type <= 5 && config.plugins.alipay && config.plugins.alipay.use) {
-      tg.sendKeyboard('Renew', telegramId, {
+      tg.sendKeyboard('续费', telegramId, {
         inline_keyboard: [[{
-          text: 'Click here to renew ' + myAccount.port,
+          text: '点击这里续费 ' + myAccount.port,
           callback_data: `alipay:accountId[${ myAccount.id }]`,
         }]],
       });
@@ -189,9 +189,9 @@ telegram.on('message', async message => {
       return server;
     })[0];
     if(!myAccount || !myServer) { return; }
-    let returnMessage = 'account information\n\n';
+    let returnMessage = '账号信息\n\n';
     const ssurl = 'ss://' + Buffer.from(`${ myServer.method }:${ myAccount.password }@${ myServer.host }:${ myAccount.port }`).toString('base64');
-    returnMessage += `address：${ myServer.host }\nport：${ myAccount.port }\npassword：${ myAccount.password }\nencryption method：${ myServer.method }\n\n`;
+    returnMessage += `地址：${ myServer.host }\n端口：${ myAccount.port }\n密码：${ myAccount.password }\n加密方式：${ myServer.method }\n\n`;
     tg.sendMessage(returnMessage, telegramId);
     if(myAccount.type >= 2 && myAccount.type <= 5) {
       
@@ -203,7 +203,7 @@ telegram.on('message', async message => {
       const data = JSON.parse(myAccount.data);
       const expireTime = data.create + data.limit * timePeriod;
       await sleep(250);
-      const isExpired = Date.now() >= expireTime ? ' [expired]' : '';
+      const isExpired = Date.now() >= expireTime ? ' [已过期]' : '';
 
       const time = {
         '2': 7 * 24 * 3600000,
@@ -222,8 +222,8 @@ telegram.on('message', async message => {
       }
       const flowLimit = data.flow * (myAccount.isMultiServerFlow ? 1 : myServer.scale);
       const currentFlow = (await flow.getServerPortFlowWithScale(myServer.id, myAccount.id, timeArray, myAccount.multiServerFlow))[0];
-      tg.sendMessage(`flow：${ prettyFlow(currentFlow) } / ${ prettyFlow(flowLimit) }`, telegramId);
-      tg.sendMessage(`expire date：${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
+      tg.sendMessage(`流量：${ prettyFlow(currentFlow) } / ${ prettyFlow(flowLimit) }`, telegramId);
+      tg.sendMessage(`过期时间：${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
     }
     await sleep(250);
     tg.sendMarkdown(`[${ ssurl }](${ ssurl })`, telegramId);
@@ -238,9 +238,9 @@ telegram.on('message', async message => {
       userId: +userId,
       time: Date.now(),
     };
-    tg.sendKeyboard('log in', telegramId, {
+    tg.sendKeyboard('登录', telegramId, {
       inline_keyboard: [[{
-        text: 'Click here to log in to the web version',
+        text: '点击这里登录网页版',
         url: `${ config.plugins.webgui.site }/home/login/telegram/${ token }`
       }]],
     });
@@ -289,7 +289,7 @@ telegram.on('message', async message => {
         }]);
       }
     }
-    tg.sendKeyboard('Select renewal type：', telegramId, {
+    tg.sendKeyboard('选择续费类型：', telegramId, {
       inline_keyboard: paymentArray,
     });
   } else if(isCallbackPayQrcode(message)) {
@@ -301,7 +301,7 @@ telegram.on('message', async message => {
     const payInfo = await alipay.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: payInfo.qrCode, time: Date.now() };
-    tg.sendMarkdown(`Please use Alipay to scan the QR code below to complete the payment\n\nor [Click this link](${ payInfo.qrCode }) Jump to Alipay payment`, telegramId);
+    tg.sendMarkdown(`请用支付宝扫描下面二维码完成支付\n\n或者 [点击此链接](${ payInfo.qrCode }) 跳转到支付宝支付`, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
 });
