@@ -54,8 +54,8 @@ const bindUser = async (userId, message) => {
     return Promise.reject('');
   }
   await user.edit({ id: userId }, { telegram: telegramId });
-  // telegram.emit('reply', message, 'Telegram账号绑定成功，输入 help 查看使用方法');
-  tg.sendMessage('Telegram账号绑定成功，输入 help 查看使用方法', telegramId);
+  // telegram.emit('reply', message, 'اتصال اکانت تلگرام با موفقیت انجام شد，برای دیدن نحوه استفاده از راهنما وارد کنید');
+  tg.sendMessage('اتصال اکانت تلگرام با موفقیت انجام شد，برای دیدن نحوه استفاده از راهنما وارد کنید', telegramId);
 };
 
 const unbindUser = async (userId) => {
@@ -69,8 +69,8 @@ const unbindUser = async (userId) => {
     return Promise.reject('');
   }
   await user.edit({ id: userId }, { telegram: null });
-  // telegram.emit('send', +exists.telegram, 'Telegram账号已经解除绑定');
-  tg.sendMessage('Telegram账号已经解除绑定', +exists.telegram);
+  // telegram.emit('send', +exists.telegram, 'حساب تلگرام محدود نشده است');
+  tg.sendMessage('حساب تلگرام محدود نشده است', +exists.telegram);
 };
 
 exports.getCode = async (userId) => {
@@ -102,7 +102,7 @@ exports.getCode = async (userId) => {
 exports.unbindUser = unbindUser;
 
 
-// 用户注册功能
+// عملکرد ثبت نام کاربر
 const isEmail = message => {
   if(!message.message || !message.message.text) { return false; }
   if(!message.message || !message.message.chat || !message.message.chat.type === 'private') { return false; }
@@ -134,10 +134,10 @@ telegram.on('message', async message => {
       const email = message.message.text;
       const isUserExists = await knex('user').where({ email }).then(s => s[0]);
       if(isUserExists) { return; }
-      await emailPlugin.sendCode(email, mailSetting.title || 'ss验证码', mailSetting.content || '欢迎新用户注册，\n您的验证码是：', {
+      await emailPlugin.sendCode(email, mailSetting.title || 'ssکد تایید', mailSetting.content || 'برای ثبت نام از کاربران جدید استقبال می کنید，\nکد تأیید شماست：', {
         telegramId
       });
-      await tg.sendMessage(`验证码已经发送至[ ${email} ]，输入验证码即可完成注册`, telegramId);
+      await tg.sendMessage(`کد تأیید به ارسال شده است[ ${email} ]，برای تکمیل ثبت نام ، کد تأیید را وارد کنید`, telegramId);
     } else if(isSignupCodeMessage(message)) {
       const telegramId = message.message.chat.id.toString();
       await isNotUserOrAdmin(telegramId);
@@ -205,7 +205,7 @@ telegram.on('message', async message => {
         autoRemove: newUserAccount.autoRemove ? 1 : 0,
         multiServerFlow: newUserAccount.multiServerFlow ? 1 : 0,
       });
-      await tg.sendMessage(`用户[ ${ emailInfo.to } ]注册完成，输入 help 查看具体指令`, telegramId);
+      await tg.sendMessage(`کاربر[ ${ emailInfo.to } ]ثبت نام کامل شد，برای مشاهده دستورالعمل های خاص ، راهنما را وارد کنید`, telegramId);
     }
   } catch(err) {
     console.log(err);
