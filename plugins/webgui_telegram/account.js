@@ -10,6 +10,39 @@ const qr = require('qr-image');
 const flow = appRequire('plugins/flowSaver/flow');
 const knex = appRequire('init/knex').knex;
 const orderPlugin = appRequire('plugins/webgui_order');
+const SHA224 = require("sha224");
+
+const createAccQrCode = (server, account) => {
+  if(!server) { return ''; }
+  if(server.type === 'WireGuard') {
+    const a = account.port % 254;
+    const b = (account.port - a) / 254;
+    return [
+      '[Interface]',
+      `Address = ${ server.net.split('.')[0] }.${ server.net.split('.')[1] }.${ b }.${ a + 1 }/32`,
+      `PrivateKey = ${ account.privateKey }`,
+      'DNS = 8.8.8.8',
+      '[Peer]',
+      `PublicKey = ${ server.key }`,
+      `Endpoint = ${ server.host }:${ server.wgPort }`,
+      `AllowedIPs = 0.0.0.0/0`,
+    ].join('\n');
+  } else if(server.type === 'Shadowsocks') {
+    return 'ss://' + base64Encode(server.method + ':' + account.password + '@' + server.host + ':' + (account.port + server.shift)+server.comment);
+  } else if(server.type === 'Trojan') {
+    console.log(server);
+    if ( server.comment.length >0)
+    { //vmess
+    var sh24=SHA224((account.port+':'+account.password))
+    var st = sh24.toString('hex');
+      st=st.substr(0, 8)+'-'+st.substr(8, 4)+'-'+st.substr(12, 4)+'-'+st.substr(16, 4)+'-'+st.substr(20, 12);
+      return 'vmess://'+base64Encode(`{"add":"${server.host}","id":"${st}","port":"${server.tjPort}","ps":"${encodeURIComponent(server.name)}",${server.comment}}`)
+      //'vmess://'+base64Encode('auto:'+st+'@'+server.host+':'+server.tjPort+server.comment)
+      ;
+    }
+    return 'trojan://' + encodeURIComponent(account.port + ':' + account.password) + '@' + server.host + ':' + server.tjPort + '#' + encodeURIComponent(server.name);
+  }
+};
 
 const prettyFlow = number => {
   if(number >= 0 && number < 1000) {
