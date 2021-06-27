@@ -25,13 +25,23 @@ telegram.on('message', async message => {
   })).title;
   const site = config.plugins.webgui.site;
   if(userStatus.status === 'empty') {
-    tg.sendKeyboard(`خوش آمدی ${ title }，\n\nلطفا ایمیل خود را اینجا وارد کنید تا کد تأیید برای ثبت نام یک حساب را دریافت کنید\n\nیا برای بازدید از نسخه وب روی دکمه زیر کلیک کنید`, telegramId, {
+    tg.sendKeyboard(`به ${ title } خوش آمدید \n\nلطفا ایمیل خود را اینجا وارد کنید تا کد تأیید برای ثبت نام یک حساب را دریافت کنید\n\nیا برای بازدید از نسخه وب روی دکمه زیر کلیک کنید`, telegramId, {
       inline_keyboard: [[{
         text: 'وارد نسخه وب شوید',
         url: site,
       }]],
     });
   } else if (userStatus.status === 'normal') {
-    tg.sendMessage('لیست دستورالعمل ها：\n\naccount: نمایش دادنssاطلاعات حساب\nlogin: ورود به سیستم سریع نسخه وب', telegramId);
+    tg.sendKeyboard('لیست دستورالعمل ها：\n\naccount: نمایش دادن اطلاعات اکانت\nlogin: ورود به سیستم سریع نسخه وب', telegramId,
+    {
+      keyboard: [[{
+        text: 'نمایش دادن اطلاعات حساب و اکانت',
+      },
+      {text:'help'}  
+    ]],
+    resize_keyboard: true,
+    }
+    
+    );
   }
 });

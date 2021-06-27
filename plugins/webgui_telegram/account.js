@@ -4,6 +4,7 @@ const isUser = appRequire('plugins/webgui_telegram/index').isUser;
 const account = appRequire('plugins/account/index');
 const server = appRequire('plugins/flowSaver/server');
 const config = appRequire('services/config').all();
+const { Buffer } = require('buffer');
 const crypto = require('crypto');
 const moment = require('moment');
 const qr = require('qr-image');
@@ -11,7 +12,7 @@ const flow = appRequire('plugins/flowSaver/flow');
 const knex = appRequire('init/knex').knex;
 const orderPlugin = appRequire('plugins/webgui_order');
 const SHA224 = require("sha224");
-
+const base64Encode= (st) =>{return Buffer.from(st).toString('base64');};
 const createAccQrCode = (server, account) => {
   if(!server) { return ''; }
   if(server.type === 'WireGuard') {
@@ -74,9 +75,22 @@ const isLogin = message => {
 };
 
 const isGetAccount = message => {
+  /*
+  if(!message.callback_query || !message.callback_query.data) { return false; }
+  console.log(message.callback_query.data);
+  if(!message.callback_query.data.toString()=='account') {
+    return false;
+  }
+  return true;
+  */
+  
+  console.log(message);
   if(!message.message || !message.message.text) { return false; }
   if(!message.message || !message.message.chat || !message.message.chat.type === 'private') { return false; }
-  if(message.message.text.trim() !== 'account') { return false; }
+  
+  
+  if(message.message.text.startsWith('نمایش')) { return true; }
+  if(message.message.text.trim()!=='/account') { return false; }
   return true;
 };
 
@@ -223,7 +237,8 @@ telegram.on('message', async message => {
     })[0];
     if(!myAccount || !myServer) { return; }
     let returnMessage = 'اطلاعات حساب\n\n';
-    const ssurl = 'ss://' + Buffer.from(`${ myServer.method }:${ myAccount.password }@${ myServer.host }:${ myAccount.port }`).toString('base64');
+const ssurl=createAccQrCode(myServer,myAccount)
+    //const ssurl = 'ss://' + Buffer.from(`${ smyServer.method }:${ myAccount.password }@${ myServer.host }:${ myAccount.port }`).toString('base64');
     returnMessage += `نشانی：${ myServer.host }\nپورت：${ myAccount.port }\nکلمه عبور：${ myAccount.password }\nرمزگذاری：${ myServer.method }\n\n`;
     tg.sendMessage(returnMessage, telegramId);
     if(myAccount.type >= 2 && myAccount.type <= 5) {

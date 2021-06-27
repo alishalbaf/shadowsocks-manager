@@ -70,7 +70,7 @@ const unbindUser = async (userId) => {
   }
   await user.edit({ id: userId }, { telegram: null });
   // telegram.emit('send', +exists.telegram, 'حساب تلگرام محدود نشده است');
-  tg.sendMessage('حساب تلگرام محدود نشده است', +exists.telegram);
+  tg.sendMessage('حساب تلگرام از اکانت جدا شده است.', +exists.telegram);
 };
 
 exports.getCode = async (userId) => {
@@ -205,7 +205,16 @@ telegram.on('message', async message => {
         autoRemove: newUserAccount.autoRemove ? 1 : 0,
         multiServerFlow: newUserAccount.multiServerFlow ? 1 : 0,
       });
-      await tg.sendMessage(`کاربر[ ${ emailInfo.to } ]ثبت نام کامل شد，برای مشاهده دستورالعمل های خاص ، راهنما را وارد کنید`, telegramId);
+      await tg.sendKeyboard(`کاربر[ ${ emailInfo.to } ]ثبت نام کامل شد，برای مشاهده دستورالعمل های خاص ، help را وارد کنید`, telegramId,{
+        inline_keyboard: [[{
+          text: 'شروع',
+          calback_data: 'help',
+        }]],
+      }
+      
+      
+      
+      );
     }
   } catch(err) {
     console.log(err);
