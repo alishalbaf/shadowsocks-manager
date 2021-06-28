@@ -28,14 +28,14 @@ telegram.on('message', async message => {
     tg.sendKeyboard(`به ${ title } خوش آمدید \n\nلطفا ایمیل خود را اینجا وارد کنید تا کد تأیید برای ثبت نام یک حساب را دریافت کنید\n\nیا برای بازدید از نسخه وب روی دکمه زیر کلیک کنید`, telegramId, {
       inline_keyboard: [[{
         text: 'وارد نسخه وب شوید',
-        url: site,
+        url: site,    
       }]],
     });
   } else if (userStatus.status === 'normal') {
     tg.sendKeyboard('لیست دستورالعمل ها：\n\naccount: نمایش دادن اطلاعات اکانت\nlogin: ورود به سیستم سریع نسخه وب', telegramId,
     {
       keyboard: [[{
-        text: 'نمایش دادن اطلاعات حساب و اکانت',
+        text: 'نمایش و مدیریت اطلاعات حساب و اکانت',
       },
       {text:'help'}  
     ]],
