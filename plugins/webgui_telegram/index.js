@@ -29,7 +29,20 @@ const sendMarkdown = (text, chat_id) => {
     qs: {
       chat_id,
       text,
-      parse_mode: 'Markdown',
+      parse_mode: 'MarkdownV2',
+    },
+    simple: false,
+  });
+};
+
+const sendHTML = (text, chat_id) => {
+  return rp({
+    method: 'GET',
+    uri: url + 'sendMessage',
+    qs: {
+      chat_id,
+      text,
+      parse_mode: 'HTML',
     },
     simple: false,
   });
@@ -59,7 +72,17 @@ const sendPhoto = (photo, chat_id) => {
     simple: false,
   });
 };
-
+const sendVideo= (video, chat_id) => {
+  return rp({
+    method: 'GET',
+    uri: url + 'sendVideo',
+    qs: {
+      chat_id,
+      video,
+    },
+    simple: false,
+  });
+};
 const EventEmitter = require('events');
 class Telegram extends EventEmitter {}
 const telegram = new Telegram();
@@ -72,14 +95,21 @@ telegram.on('reply', (message, text) => {
 telegram.on('send', (chat_id, text) => {
   sendMessage(text, chat_id);
 });
-telegram.on('markdwon', (chat_id, text) => {
+telegram.on('markdown', (chat_id, text) => {
   sendMarkdown(text, chat_id);
 });
+
+
+
 telegram.on('keyboard', (chat_id, text, keyboard) => {
   sendKeyboard(text, chat_id, JSON.stringify(keyboard));
 });
 telegram.on('photo', (chat_id, photo) => {
   sendPhoto(photo, chat_id);
+});
+
+telegram.on('video', (chat_id, video) => {
+  sendVideo(video, chat_id);
 });
 
 const setUpdateId = async (id) => {
@@ -204,8 +234,10 @@ exports.getUserStatus = getUserStatus;
 
 exports.sendKeyboard = sendKeyboard;
 exports.sendMarkdown = sendMarkdown;
+exports.sendHTML = sendHTML;
 exports.sendMessage = sendMessage;
 exports.sendPhoto = sendPhoto;
+exports.sendVideo = sendVideo;
 
 appRequire('plugins/webgui_telegram/user');
 appRequire('plugins/webgui_telegram/help');

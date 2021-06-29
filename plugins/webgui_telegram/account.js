@@ -47,15 +47,15 @@ const createAccQrCode = (server, account) => {
 
 const prettyFlow = number => {
   if(number >= 0 && number < 1000) {
-    return number + ' B';
+    return number + 'B';
   } else if(number >= 1000 && number < 1000 * 1000) {
-    return (number / 1000).toFixed(1) + ' KB';
+    return (number / 1000).toFixed(1) + 'KB';
   } else if(number >= 1000 * 1000 && number < 1000 * 1000 * 1000) {
-    return (number / (1000 * 1000)).toFixed(2) + ' MB';
+    return (number / (1000 * 1000)).toFixed(2) + 'MB';
   } else if(number >= 1000 * 1000 * 1000 && number < 1000 * 1000 * 1000 * 1000) {
-    return (number / (1000 * 1000 * 1000)).toFixed(3) + ' GB';
+    return (number / (1000 * 1000 * 1000)).toFixed(3) + 'GB';
   } else if(number >= 1000 * 1000 * 1000 * 1000 && number < 1000 * 1000 * 1000 * 1000 * 1000) {
-    return (number / (1000 * 1000 * 1000 * 1000)).toFixed(3) + ' TB';
+    return (number / (1000 * 1000 * 1000 * 1000)).toFixed(3) + 'TB';
   } else {
     return number + '';
   }
@@ -131,14 +131,17 @@ telegram.on('message', async message => {
     const userId = await isUser(telegramId);
     const myAccount = await account.getAccount({ userId });
     if(!myAccount.length) {
-      tg.sendMessage('کاربر فعلی هیچ حسابی اختصاص داده نشده است', telegramId);
+      
       if(config.plugins.paypal && config.plugins.paypal.use) {
-        tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
+        tg.sendKeyboard('😔هیچ اکانتی ندارید\nیک حساب جدید بخرید', telegramId, {
           inline_keyboard: [[{
-            text: 'برای خرید اینجا را کلیک کنید',
+            text: 'برای خرید اینجا را کلیک کنید🛒',
             callback_data: `paypal:accountId[0]`,
           }]],
         });
+      }
+      else{
+        tg.sendMessage('کاربر فعلی هیچ حسابی اختصاص داده نشده است', telegramId);
       }
       return;
     }
@@ -163,7 +166,7 @@ telegram.on('message', async message => {
       if(config.plugins.paypal && config.plugins.paypal.use) {
         tg.sendKeyboard('یک حساب جدید بخرید', telegramId, {
           inline_keyboard: [[{
-            text: 'برای خرید اینجا را کلیک کنید',
+            text: 'برای خرید اینجا را کلیک کنید🛒',
             callback_data: `paypal:accountId[0]`,
           }]],
         });
@@ -212,9 +215,9 @@ telegram.on('message', async message => {
       inline_keyboard: serverArray,
     });
     if(myAccount.type >= 2 && myAccount.type <= 5 && config.plugins.paypal && config.plugins.paypal.use) {
-      tg.sendKeyboard('تجدید', telegramId, {
+      tg.sendKeyboard('تمدید', telegramId, {
         inline_keyboard: [[{
-          text: 'برای تمدید اینجا کلیک کنید ' + myAccount.port,
+          text: '💼برای تمدید اینجا کلیک کنید ' + myAccount.port,
           callback_data: `paypal:accountId[${ myAccount.id }]`,
         }]],
       });
@@ -239,8 +242,11 @@ telegram.on('message', async message => {
     let returnMessage = 'اطلاعات حساب\n\n';
 const ssurl=createAccQrCode(myServer,myAccount)
     //const ssurl = 'ss://' + Buffer.from(`${ smyServer.method }:${ myAccount.password }@${ myServer.host }:${ myAccount.port }`).toString('base64');
-    returnMessage += `نشانی：${ myServer.host }\nپورت：${ myAccount.port }\nکلمه عبور：${ myAccount.password }\nرمزگذاری：${ myServer.method }\n\n`;
-    tg.sendMessage(returnMessage, telegramId);
+    returnMessage += `host：${ myServer.host }\nport：${ myAccount.port }\n`;
+    if (myServer.type=== 'Shadowsocks') 
+    returnMessage +=`کلمه عبور：${ myAccount.password }\nرمزگذاری：${ myServer.method }\n\n`;
+    //returnMessage+='جهت کپی در کلیپبورد روی لینک کلیک کنید';    
+    //tg.sendMessage(returnMessage, telegramId);
     if(myAccount.type >= 2 && myAccount.type <= 5) {
       
       let timePeriod = 0;
@@ -270,11 +276,13 @@ const ssurl=createAccQrCode(myServer,myAccount)
       }
       const flowLimit = data.flow * (myAccount.isMultiServerFlow ? 1 : myServer.scale);
       const currentFlow = (await flow.getServerPortFlowWithScale(myServer.id, myAccount.id, timeArray, myAccount.multiServerFlow))[0];
-      tg.sendMessage(`جریان：${ prettyFlow(currentFlow) } / ${ prettyFlow(flowLimit) }`, telegramId);
-      tg.sendMessage(`تاریخ انقضا：${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
+      tg.sendMessage(`جریان:${ prettyFlow(currentFlow) } از ${ prettyFlow(flowLimit) }`, telegramId);
+      tg.sendMessage(`تاریخ انقضا: ${ moment(expireTime).format('YYYY-MM-DD HH:mm') }${ isExpired }`, telegramId);
     }
     await sleep(250);
-    tg.sendMarkdown(`[${ ssurl }](${ ssurl })`, telegramId);
+    let tmpst= `[${ ssurl }](${ ssurl })`
+    tmpst="\`"+`${ ssurl }`+"\`";
+    tg.sendMarkdown(tmpst, telegramId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: ssurl, time: Date.now() };
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
@@ -332,7 +340,7 @@ const ssurl=createAccQrCode(myServer,myAccount)
     for(const order of orders) {
       if(order.paypal > 0) {
         paymentArray.push([{
-          text: `${ order.name } ${ order.paypal }`,
+          text: `🛒 ${ order.name } ${ order.paypal } ریال`,
           callback_data: `paypal:qrcode:accountId[${ accountId }]type[${ order.id }]`,
         }]);
       }
@@ -350,7 +358,7 @@ const ssurl=createAccQrCode(myServer,myAccount)
     const payInfo = await paypal.createOrder(userId, accountId > 0 ? accountId : null, +orderId);
     const qrcodeId = crypto.randomBytes(32).toString('hex');
     qrcodeObj[qrcodeId] = { url: payInfo.link, time: Date.now() };
-    tg.sendMarkdown(`برای اسکن کد QR زیر برای تکمیل پرداخت لطفاً از pay.ir استفاده کنید\n\n(${ payInfo.link }) یا [روی این لینک کلیک کنید](${ payInfo.qrCode }) به پرداخت pay.ir بروید`, telegramId);
+    tg.sendMarkdown(`برای تکمیل پرداخت لطفاًQR کد زیر را اسکن کنید  \n\nیا [\*روی این لینک کلیک کنید*](${ payInfo.link }) `, telegramId);
     tg.sendPhoto(`${ config.plugins.webgui.site }/api/user/telegram/qrcode/${ qrcodeId }`, telegramId);
   }
 });
