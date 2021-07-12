@@ -34,6 +34,18 @@ const sendMarkdown = (text, chat_id) => {
     simple: false,
   });
 };
+const sendMarkdownV1 = (text, chat_id) => {
+  return rp({
+    method: 'GET',
+    uri: url + 'sendMessage',
+    qs: {
+      chat_id,
+      text,
+      parse_mode: 'Markdown',
+    },
+    simple: false,
+  });
+};
 
 const sendHTML = (text, chat_id) => {
   return rp({
@@ -234,6 +246,7 @@ exports.getUserStatus = getUserStatus;
 
 exports.sendKeyboard = sendKeyboard;
 exports.sendMarkdown = sendMarkdown;
+exports.sendMarkdownV1 = sendMarkdownV1;
 exports.sendHTML = sendHTML;
 exports.sendMessage = sendMessage;
 exports.sendPhoto = sendPhoto;

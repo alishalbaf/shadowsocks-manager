@@ -20,9 +20,9 @@ telegram.on('message', async message => {
   if(!isHelp(message)) { return; }
   const telegramId = message.message.chat.id.toString();
   if( message.message.text.startsWith('برنامه')) { 
-    tg.sendMarkdown(`\*Android*\n https://play.google.com/store/apps/details?id=com.v2ray.ang&hl=en&gl=US \n\n https://play.google.com/store/apps/details?id=io.nekohasekai.sagernet&hl=en&gl=US`,telegramId);
-    tg.sendMarkdown(`\*Windows* \n https://github.com/netchx/netch/releases/download/1.8.5/Netch.7z  `,telegramId);
-    tg.sendMarkdown(`\*IOS* \n https://apps.apple.com/am/app/shadowlink-shadowsocks-tool/id1439686518  `,telegramId);
+    tg.sendMarkdownV1(`\*Android* \n https://play.google.com/store/apps/details?id=com.v2ray.ang&hl=en&gl=US \n\n https://play.google.com/store/apps/details?id=io.nekohasekai.sagernet&hl=en&gl=US`,telegramId);
+    tg.sendMarkdownV1("\*Windows<* \n https://github\.com/netchx/netch/releases/download/1.8.5/Netch.7z ",telegramId);
+    tg.sendMarkdownV1('\*IOS* \n https://apps.apple.com/am/app/shadowlink-shadowsocks-tool/id1439686518 ',telegramId);
     tg.sendMessage(` لینک اکانت سرویس را از بات کپی کرده و داخل اکانت ها وارد نمایدد ( در ویندوز بعد از ایمپورت مود را روی گلوبال بگذارید)` ,telegramId);
 
     return;
